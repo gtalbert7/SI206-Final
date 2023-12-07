@@ -70,11 +70,8 @@ else:
 
 '''
 TODO LIST:
-1. Collect top 5 artists in specific countries on Spotify
+1. Collect top 10 artists in USA on Spotify
 --- https://www.youtube.com/watch?v=kaBVN8uP358&t=0s
-- USA
-- England
-- Brazil
 2. Collect top 5 songs from each artist collected, on Spotify
 3. Compare those songs to how many times they have been shazamed
 - Compare those songs to each other within an artist
