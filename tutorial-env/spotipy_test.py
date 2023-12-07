@@ -18,7 +18,6 @@ results = spotify.artist_top_tracks(uri, country='US')
 
 print(results)
 
-
 # def find_artist_id(artist_name):
 #     spotify = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id, client_secret))
 
