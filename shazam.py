@@ -3,10 +3,11 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import requests
 from top_songs import add_top_tracks_to_db
+import time
 
 
 
-batch_size = 25
+batch_size = 5
 api_key = '40333609'
 
 def create_table(): 
@@ -14,30 +15,27 @@ def create_table():
     cursor = conn.cursor() 
 
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tracks (
-            id INTEGER,
-            name TEXT,
-            track_id TEXT,
-            track_name TEXT,
-            shazam_count INTEGER,  
-            FOREIGN KEY (id) REFERENCES artists (id)
-        )
-    ''')
+    CREATE TABLE IF NOT EXISTS tracks (
+        id INTEGER,
+        name TEXT,
+        track_id TEXT,
+        track_name TEXT,
+        shazam_count INTEGER,
+        PRIMARY KEY (id, track_id),  
+        UNIQUE (track_id)  
+    )
+''')
 
     conn.commit()
     conn.close()
 
     
 def get_shazam_count(track_name):
-  
-   
     base_url = "https://shazam.p.rapidapi.com/songs/get-count"
-    
 
     headers = {
         "X-RapidAPI-Key": "658358df4fmshea041f36d27b47fp185941jsnb5ee2134e5e1",
         "X-RapidAPI-Host": "shazam.p.rapidapi.com",
-       
     }
 
     params = {
@@ -45,10 +43,9 @@ def get_shazam_count(track_name):
         "key": api_key
     }
 
-
     try:
         response = requests.get(base_url, headers=headers, params=params)
-        response.raise_for_status()  
+        response.raise_for_status()
 
         data = response.json()
         shazam_count = data.get("total", 0)
@@ -59,22 +56,78 @@ def get_shazam_count(track_name):
     except requests.exceptions.RequestException as e:
         print(f"Error retrieving Shazam count for {track_name}: {e}")
         return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
+
+  
+  
+   
+    # base_url = "https://shazam.p.rapidapi.com/songs/get-count"
+    
+
+    # headers = {
+    #     "X-RapidAPI-Key": "658358df4fmshea041f36d27b47fp185941jsnb5ee2134e5e1",
+    #     "X-RapidAPI-Host": "shazam.p.rapidapi.com",
+       
+    # }
+
+    # params = {
+    #     "term": track_name,
+    #     "key": api_key
+    # }
+
+    # retries = 3
+    # delay_seconds = 10
+
+    # for attempt in range(retries):
+    #     try:
+    #         response = requests.get(base_url, headers=headers, params=params)
+    #         response.raise_for_status()
+
+    #         data = response.json()
+    #         shazam_count = data.get("total", 0)
+
+    #         print(f"Track: {track_name}, Shazam Count: {shazam_count}")
+
+    #         return shazam_count
+    #     except requests.exceptions.RequestException as e:
+    #         print(f"Error retrieving Shazam count for {track_name}: {e}")
+    #         if attempt < retries - 1:
+    #             print(f"Retrying in {delay_seconds} seconds...")
+    #             time.sleep(delay_seconds)
+    #         else:
+    #             print("Max retries reached. Exiting.")
+    #             return None
+    #     except Exception as e:
+    #         print(f"Unexpected error: {e}")
+    #         return None
+
+
+
     
 
 
 def insert_shazam_count(track_id, track_name, shazam_count): 
-    conn = sqlite3.connect('artist.db')  
+    conn = sqlite3.connect('artists.db')  
     cursor = conn.cursor()
 
-    cursor.execute('''
-        INSERT INTO tracks (track_id, track_name, shazam_count)
-        VALUES (?, ?, ?)
-        ON CONFLICT (track_id)  
-        DO UPDATE SET shazam_count = ?;
-    ''', (track_id, track_name, shazam_count, shazam_count))
+    try:
+        cursor.execute('''
+            INSERT INTO tracks (id, track_id, track_name, shazam_count)
+            VALUES (?, ?, ?, ?);
+        ''', (track_id, track_id, track_name, shazam_count))
+    except sqlite3.IntegrityError:
+        cursor.execute('''
+            UPDATE tracks
+            SET shazam_count = ?
+            WHERE id = ? AND track_id = ?;
+        ''', (shazam_count, track_id, track_id))
 
     conn.commit()
     conn.close()
+   
 
 
 
