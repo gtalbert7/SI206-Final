@@ -61,7 +61,7 @@ songs = [data[0] for data in chart_data]
 weeks_on_chart = [data[1] for data in chart_data]
 
 # chart 2
-plt.figure(figsize=(15, 10))
+plt.figure(figsize=(15, 9))
 plt.bar(songs, weeks_on_chart, color='teal')
 plt.xlabel('Song Names')
 plt.ylabel('Weeks on Billboard Hot 100')
@@ -85,12 +85,20 @@ genre_data = cursor.fetchall()
 
 conn.close()
 
-genres = [data[0] if data[0] else "Unknown" for data in genre_data]
-counts = [data[1] for data in genre_data]
+genres_3 = [data[0] if data[0] else "Unknown" for data in genre_data]
+counts_3 = [data[1] for data in genre_data]
 
 # chart 3
 plt.figure(figsize=(10, 8))
-plt.pie(counts, labels=genres, autopct='%1.1f%%', startangle=140)
+plt.pie(counts_3, labels=genres_3, autopct='%1.1f%%', startangle=140)
 plt.axis('equal')
 plt.title('Genre Frequency of Top Artists of the 2010s with Current Songs on Billboard Hot 100')
+plt.show()
+
+# extra credit visualization
+plt.figure(figsize=(12, 8))
+plt.bar(genres, counts, color='skyblue')
+plt.xlabel('Genres')
+plt.ylabel('Number of Appearances in Top Artists List')
+plt.title('Genre Distribution for Top 100 Artists of the 2010s')
 plt.show()
