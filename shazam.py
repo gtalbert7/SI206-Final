@@ -3,7 +3,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import requests
 from top_songs import add_top_tracks_to_db
-import time
+
 
 
 batch_size = 25
@@ -45,28 +45,6 @@ def get_shazam_count(track_name):
         "key": api_key
     }
 
-    retries = 3
-    delay_seconds = 10  # Increase the delay to 10 seconds
-
-    # for attempt in range(retries):
-    #     try:
-    #         response = requests.get(base_url, headers=headers, params=params)
-    #         response.raise_for_status()
-
-    #         data = response.json()
-    #         shazam_count = data.get("total", 0)
-
-    #         print(f"Track: {track_name}, Shazam Count: {shazam_count}")
-
-    #         return shazam_count
-    #     except requests.exceptions.RequestException as e:
-    #         print(f"Error retrieving Shazam count for {track_name}: {e}")
-    #         if attempt < retries - 1:
-    #             print(f"Retrying in {delay_seconds} seconds...")
-    #             time.sleep(delay_seconds)
-    #         else:
-    #             print("Max retries reached. Exiting.")
-    #             return None
 
     try:
         response = requests.get(base_url, headers=headers, params=params)
