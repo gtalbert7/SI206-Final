@@ -59,6 +59,7 @@ chart_data = cursor.fetchall()
 
 songs = [data[0] for data in chart_data]
 weeks_on_chart = [data[1] for data in chart_data]
+print(weeks_on_chart)
 
 # chart 2
 plt.figure(figsize=(15, 9))
