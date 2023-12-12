@@ -11,7 +11,7 @@ def get_artists_without_tracks(conn):
     cursor.execute('''
         SELECT id, name, spotify_id FROM artists 
         WHERE id NOT IN (SELECT DISTINCT id FROM tracks)
-        ORDER BY id LIMIT 5
+        ORDER BY id LIMIT 12
     ''')
     return cursor.fetchall()
 
@@ -19,7 +19,7 @@ def add_top_tracks_to_db(conn, spotify):
     artists = get_artists_without_tracks(conn)
     cursor = conn.cursor()
     for artist_id, artist_name, spotify_id in artists:
-        top_tracks = spotify.artist_top_tracks(spotify_id, country='US')['tracks'][:5]
+        top_tracks = spotify.artist_top_tracks(spotify_id, country='US')['tracks'][:2]
         for index, track in enumerate(top_tracks, start=1):
             track_id = f"{artist_id}.{index}"
             track_name = track['name']

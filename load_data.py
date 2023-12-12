@@ -4,12 +4,6 @@ from bs4 import BeautifulSoup
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-import sqlite3
-import requests
-from bs4 import BeautifulSoup
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-
 def load_data():
     response = requests.get('https://top40weekly.com/top-100-artists-of-the-10s/')
     webpage_content = response.text
@@ -48,7 +42,7 @@ def load_data():
         if items:
             spotify_id = items[0]['id']
             genres = items[0]['genres']
-            genre = genres[0] if genres else "Unknown"
+            genre = genres[0] if genres else "unknown"
             cursor.execute('INSERT OR IGNORE INTO artists (name, spotify_id, genre) VALUES (?, ?, ?)', (artist, spotify_id, genre))
         else:
             cursor.execute('INSERT OR IGNORE INTO artists (name) VALUES (?)', (artist,))

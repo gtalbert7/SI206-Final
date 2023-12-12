@@ -113,34 +113,20 @@ def insert_shazam_count(track_id, track_name, shazam_count):
     conn = sqlite3.connect('artists.db')  
     cursor = conn.cursor()
 
-    try:
-        cursor.execute('''
-            INSERT INTO tracks (id, track_id, track_name, shazam_count)
-            VALUES (?, ?, ?, ?);
-        ''', (track_id, track_id, track_name, shazam_count))
-    except sqlite3.IntegrityError:
-        cursor.execute('''
-            UPDATE tracks
-            SET shazam_count = ?
-            WHERE id = ? AND track_id = ?;
-        ''', (shazam_count, track_id, track_id))
+    # Update the existing row with the new Shazam count
+    cursor.execute('''
+        UPDATE tracks
+        SET shazam_count = ?
+        WHERE track_id = ?;
+    ''', (shazam_count, track_id))
 
     conn.commit()
     conn.close()
-   
-
-
 
 def main():
-    
     create_table()
 
-    conn = sqlite3.connect('artists.db')  
-    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id='84c99acc62714269b6ff371dc4e7dc97', client_secret='b28f081661b64fb592a3c63994614f65'))
-
-    add_top_tracks_to_db(conn, spotify)
-    
-    
+    conn = sqlite3.connect('artists.db')
     cursor = conn.cursor()
     cursor.execute('SELECT track_id, track_name FROM tracks WHERE shazam_count IS NULL LIMIT ?;', (batch_size,))
     tracks = cursor.fetchall()
