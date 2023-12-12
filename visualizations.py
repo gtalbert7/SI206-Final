@@ -38,19 +38,18 @@ for i in range(len(genres)):
         rock += counts[i]
     else: 
         other += counts[i]
-
 genres = ['Pop', 'Hip Hop/Rap', 'Dance', 'Soul', 'R&B', 'Country', 'Rock', 'Other']
 counts = [pop, hip_hop_rap, dance, soul, r_b, country, rock, other]
 
-print(genres)
-print('~~~~~~~~~~~~~~~~~~~~~~~~~')
-print(counts)
+# print(genres)
+# print('~~~~~~~~~~~~~~~~~~~~~~~~~')
+# print(counts)
 
 # chart 1
 plt.figure(figsize=(10, 8))
 plt.pie(counts, labels=genres, autopct='%1.1f%%', startangle=140)
 plt.axis('equal')
-plt.title('Genre Distribution in Artists Table')
+plt.title('Genre Distribution for Top 100 Artists of the 2010s')
 plt.show()
 
 
@@ -58,16 +57,15 @@ query = "SELECT track_name, weeks_on_hot_100 FROM tracks WHERE weeks_on_hot_100 
 cursor.execute(query)
 chart_data = cursor.fetchall()
 
-
 songs = [data[0] for data in chart_data]
 weeks_on_chart = [data[1] for data in chart_data]
 
 # chart 2
 plt.figure(figsize=(15, 10))
 plt.bar(songs, weeks_on_chart, color='teal')
-plt.xlabel('Songs')
+plt.xlabel('Song Names')
 plt.ylabel('Weeks on Billboard Hot 100')
-plt.title('Songs and their Weeks on Billboard Hot 100')
+plt.title('Current Songs on the Billboard Hot 100 and their Longevity in Weeks')
 plt.xticks(rotation=90)
 plt.tight_layout()
 plt.show()
@@ -93,6 +91,6 @@ counts = [data[1] for data in genre_data]
 # chart 3
 plt.figure(figsize=(10, 8))
 plt.pie(counts, labels=genres, autopct='%1.1f%%', startangle=140)
-plt.axis('equal')  # Equal aspect ratio ensures the pie chart is circular
-plt.title('Genre Frequency of Artists with Top Ten Charting Songs on Billboard Hot 100')
+plt.axis('equal')
+plt.title('Genre Frequency of Top Artists of the 2010s with Current Songs on Billboard Hot 100')
 plt.show()
