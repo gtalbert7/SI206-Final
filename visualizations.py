@@ -5,50 +5,49 @@ db_path = 'artists.db'
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-query = "SELECT genre, COUNT(*) as count FROM artists GROUP BY genre"
+query = """
+    SELECT g.genre, COUNT(*) as count 
+    FROM artists a
+    JOIN genres g ON a.genre_id = g.id 
+    GROUP BY g.genre
+"""
 cursor.execute(query)
 genre_data = cursor.fetchall()
 
-genres = [data[0] for data in genre_data]
-counts = [data[1] for data in genre_data]
+genres_dict = {'Pop': 0, 'Hip Hop/Rap': 0, 'Dance': 0, 'Soul': 0, 'R&B': 0, 'Country': 0, 'Rock': 0, 'Other': 0}
+for genre, count in genre_data:
+    if 'pop' in genre and 'rap' not in genre:
+        genres_dict['Pop'] += count
+    elif 'hip hop' in genre or 'rap' in genre:
+        genres_dict['Hip Hop/Rap'] += count
+    elif 'dance' in genre:
+        genres_dict['Dance'] += count
+    elif 'soul' in genre:
+        genres_dict['Soul'] += count
+    elif 'r&b' in genre:
+        genres_dict['R&B'] += count
+    elif 'country' in genre:
+        genres_dict['Country'] += count
+    elif 'rock' in genre:
+        genres_dict['Rock'] += count
+    else:
+        genres_dict['Other'] += count
 
-pop = 0
-hip_hop_rap = 0
-dance = 0
-soul = 0
-r_b = 0
-country = 0
-rock = 0
-other = 0
-for i in range(len(genres)):
-    if 'pop' in genres[i] and 'rap' not in genres[i]:
-        pop += counts[i]
-    elif 'hip hop' in genres[i] or 'rap' in genres[i]:
-        if 'pop' not in genres[i]:
-            hip_hop_rap += counts[i]
-    elif 'dance' in genres[i]:
-        dance += counts[i]
-    elif 'soul' in genres[i]:
-        soul += counts[i]
-    elif 'r&b' in genres[i]:
-        r_b += counts[i]
-    elif 'country' in genres[i]:
-        country += counts[i]
-    elif 'rock' in genres[i]:
-        rock += counts[i]
-    else: 
-        other += counts[i]
-genres = ['Pop', 'Hip Hop/Rap', 'Dance', 'Soul', 'R&B', 'Country', 'Rock', 'Other']
-counts = [pop, hip_hop_rap, dance, soul, r_b, country, rock, other]
+def output_genres_to_file():
+    with open('genre_counts.txt', 'w') as f:
+        for genre, count in genres_dict.items():
+            f.write(f"{genre}: {count}\n")
 
-# print(genres)
-# print('~~~~~~~~~~~~~~~~~~~~~~~~~')
-# print(counts)
+output_genres_to_file()
+
+genres = list(genres_dict.keys())
+counts = list(genres_dict.values())
 
 # chart 1
-plt.figure(figsize=(10, 8))
-plt.pie(counts, labels=genres, autopct='%1.1f%%', startangle=140)
-plt.axis('equal')
+plt.figure(figsize=(12, 8))
+plt.bar(genres, counts, color='skyblue')
+plt.xlabel('Genres')
+plt.ylabel('Number of Appearances in Top Artists List')
 plt.title('Genre Distribution for Top 100 Artists of the 2010s')
 plt.show()
 
@@ -73,11 +72,12 @@ plt.show()
 
 
 query = """
-    SELECT a.genre, COUNT(*) as count
+    SELECT g.genre, COUNT(*) as count
     FROM tracks AS t
-    JOIN artists AS a ON t.id = a.id
+    JOIN artists AS a ON t.artist_id = a.artist_id
+    JOIN genres AS g ON a.genre_id = g.id
     WHERE t.weeks_on_hot_100 > 0
-    GROUP BY a.genre
+    GROUP BY g.genre
     ORDER BY count DESC
     LIMIT 10
 """
@@ -86,7 +86,7 @@ genre_data = cursor.fetchall()
 
 conn.close()
 
-genres_3 = [data[0] if data[0] else "Unknown" for data in genre_data]
+genres_3 = [data[0] if data[0] else "unknown" for data in genre_data]
 counts_3 = [data[1] for data in genre_data]
 
 # chart 3
@@ -97,9 +97,8 @@ plt.title('Genre Frequency of Top Artists of the 2010s with Current Songs on Bil
 plt.show()
 
 # extra credit visualization
-plt.figure(figsize=(12, 8))
-plt.bar(genres, counts, color='skyblue')
-plt.xlabel('Genres')
-plt.ylabel('Number of Appearances in Top Artists List')
+plt.figure(figsize=(10, 8))
+plt.pie(counts, labels=genres, autopct='%1.1f%%', startangle=140)
+plt.axis('equal')
 plt.title('Genre Distribution for Top 100 Artists of the 2010s')
 plt.show()

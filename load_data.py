@@ -21,37 +21,70 @@ def load_data():
     cursor = conn.cursor()
 
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS artists (
+    CREATE TABLE IF NOT EXISTS genres (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        spotify_id TEXT NOT NULL UNIQUE,
-        genre TEXT
+        genre TEXT NOT NULL UNIQUE
     )
     ''')
 
-    cursor.execute('SELECT COUNT(*) FROM artists')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS artist_ids (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS artists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        artist_id INTEGER NOT NULL,
+        spotify_id TEXT UNIQUE,
+        genre_id INTEGER,
+        FOREIGN KEY (artist_id) REFERENCES artist_ids(id),
+        FOREIGN KEY (genre_id) REFERENCES genres(id)
+    )
+    ''')
+
+    def get_or_create_genre_id(genre):
+        cursor.execute('SELECT id FROM genres WHERE genre = ?', (genre,))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        cursor.execute('INSERT INTO genres (genre) VALUES (?)', (genre,))
+        return cursor.lastrowid
+
+    def get_or_create_artist_id(name):
+        cursor.execute('SELECT id FROM artist_ids WHERE name = ?', (name,))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        cursor.execute('INSERT INTO artist_ids (name) VALUES (?)', (name,))
+        return cursor.lastrowid
+
+    cursor.execute('SELECT COUNT(*) FROM artist_ids')
     number_of_artists_already_added = cursor.fetchone()[0]
     batch_size = 25
     start_index = number_of_artists_already_added
-    end_index = start_index + batch_size
+    end_index = min(start_index + batch_size, len(artist_names))
     next_batch = artist_names[start_index:end_index]
 
     for artist in next_batch:
+        artist_id = get_or_create_artist_id(artist)
         result = sp.search(q='artist:' + artist, type='artist')
         items = result['artists']['items']
         if items:
             spotify_id = items[0]['id']
             genres = items[0]['genres']
-            genre = genres[0] if genres else "unknown"
-            cursor.execute('INSERT OR IGNORE INTO artists (name, spotify_id, genre) VALUES (?, ?, ?)', (artist, spotify_id, genre))
-        else:
-            cursor.execute('INSERT OR IGNORE INTO artists (name) VALUES (?)', (artist,))
+            genre_id = get_or_create_genre_id(genres[0] if genres else "unknown")
+            cursor.execute('INSERT OR IGNORE INTO artists (artist_id, spotify_id, genre_id) VALUES (?, ?, ?)', (artist_id, spotify_id, genre_id))
+
     conn.commit()
 
     cursor.execute('SELECT * FROM artists')
     rows = cursor.fetchall()
     for row in rows:
         print(row)
+
     conn.close()
 
 load_data()

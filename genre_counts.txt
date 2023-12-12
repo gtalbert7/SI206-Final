@@ -1,0 +1,8 @@
+Pop: 45
+Hip Hop/Rap: 31
+Dance: 1
+Soul: 2
+R&B: 3
+Country: 3
+Rock: 3
+Other: 11
