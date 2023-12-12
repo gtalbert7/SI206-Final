@@ -2,7 +2,6 @@ import sqlite3
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-
 client_id = '84c99acc62714269b6ff371dc4e7dc97'
 client_secret = 'b28f081661b64fb592a3c63994614f65'
 
@@ -41,10 +40,6 @@ def main():
     conn.commit()
     spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id=client_id, client_secret=client_secret))
     add_top_tracks_to_db(conn, spotify)
-    # cursor.execute('SELECT * FROM tracks')
-    # rows = cursor.fetchall()
-    # for row in rows:
-    #     print(row)
     conn.close()
 
 main()
