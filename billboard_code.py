@@ -14,20 +14,17 @@ def remove_features(track_name):
 def get_weeks_on_chart(song_titles):
     song_weeks = {}
     chart = billboard.ChartData('hot-100')
-
     for song in chart:
         song_title_cleaned = remove_features(song.title).lower()
         if song_title_cleaned in song_titles:
             index = song_titles.index(song_title_cleaned)
             original_title = song_titles[index]
             song_weeks[original_title] = song.weeks
-
     return song_weeks
 
 db_path = 'artists.db'
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
-
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS update_offset (
         id INTEGER PRIMARY KEY,
@@ -45,7 +42,6 @@ else:
 
 cursor.execute("SELECT track_id, track_name FROM tracks LIMIT 25 OFFSET ?", (offset,))
 batch_tracks = cursor.fetchall()
-
 track_names = [remove_features(track[1]).lower() for track in batch_tracks]
 track_id_name_map = {remove_features(track[1]).lower(): track[0] for track in batch_tracks}
 
@@ -60,11 +56,11 @@ for track_name, weeks in weeks_on_chart.items():
     track_id = track_id_name_map.get(track_name)
     if track_id:
         cursor.execute("UPDATE tracks SET weeks_on_hot_100 = ? WHERE track_id = ?", (weeks, track_id))
-
 new_offset = offset + 25
 cursor.execute("UPDATE update_offset SET offset = ? WHERE id = 1", (new_offset,))
+if offset > 100:
+    offset = 100
 
 conn.commit()
 conn.close()
-
-print(f"Updated 'tracks' table with 'weeks_on_hot_100' data for 25 rows starting from offset {offset}.")
+print(f"{offset}.")
